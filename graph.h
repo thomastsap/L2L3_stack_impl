@@ -1,4 +1,4 @@
-#ifdef GRAPH_H
+#ifndef GRAPH_H
 #define GRAPH_H
 
 typedef struct interface interface_t;
@@ -30,7 +30,7 @@ typedef struct node
 {
 	unsigned int id;
 	char* name;
-	interfaceList_t* interface;
+	interfaceList_t* interfaceList;
 } node_t;
 
 typedef struct nodeList
@@ -42,24 +42,10 @@ typedef struct nodeList
 typedef struct graph
 {
 	char* name;
-	nodeList_t* node;
+	nodeList_t* nodeList;
 } graph_t;
 
-static inline node_t* getInterfaceOwningNode(interface_t* interface)
-{
-#ifdef DEBUG_MODE
-	if(interface)
-#endif
-
-	return interface->owningNode;
-
-#ifdef DEBUG_MODE
-	else
-	{
-		fprintf(stderr, "getOwningNode(): Error, NULL argument!\n");
-		return NULL;
-	}
-#endif
-}
+node_t* getInterfaceOwningNode(interface_t* interface);
+graph_t* createNewGraph(char* topologyName);
 
 #endif
