@@ -18,34 +18,28 @@ typedef struct interface
 	node_t* owningNode;
 	link_t* owningLink;
 	unsigned int cost; // maybe of no use for now
-} interface_t;
-
-typedef struct interfaceList
-{
-	interface_t* interface;
 	interface_t* next;
-} interfaceList_t;
+} interface_t;
 
 typedef struct node
 {
 	unsigned int id;
 	char* name;
-	interfaceList_t* interfaceList;
-} node_t;
-
-typedef struct nodeList
-{
-	node_t* node;
+	interface_t* interface;
 	node_t* next;
-} nodeList_t;
+} node_t;
 
 typedef struct graph
 {
 	char* name;
-	nodeList_t* nodeList;
+	node_t* node;
 } graph_t;
 
 node_t* getInterfaceOwningNode(interface_t* interface);
 graph_t* createNewGraph(char* topologyName);
+void printGraph(graph_t* graph);
+node_t* createGraphNode(graph_t* graph, char* nodeName);
+interface_t* createNodeInterface(node_t* node, char* interfaceName);
+void insertLinkBetweenNodes(node_t* fromNode, char* fromInterfaceName, node_t* toNode, char* toInterfaceName, unsigned int linkCost);
 
 #endif
