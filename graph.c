@@ -18,10 +18,10 @@ graph_t* createNewGraph(char* topologyName)
 	LOG_FUNCTION_ENTERING();
 	assert(topologyName != NULL && strlen(topologyName) != 0);
 
-	graph_t* graph = (graph_t*)malloc(sizeof(graph_t));
+	graph_t* graph = (graph_t*)calloc(1, sizeof(graph_t));
 	assert(graph != NULL);
 
-	graph->name = (char*)malloc(strlen(topologyName) + 1 /*terminal char*/ );
+	graph->name = (char*)calloc(1, strlen(topologyName) + 1 /*terminal char*/ );
 	assert(graph->name != NULL);
 
 	strncpy(graph->name, topologyName, strlen(topologyName));	
@@ -90,11 +90,11 @@ node_t* createGraphNode(graph_t* graph, char* nodeName)
 
 	static unsigned int newNodeID = 0;
 
-	node_t* newNode = (node_t*)malloc(sizeof(node_t));
+	node_t* newNode = (node_t*)calloc(1, sizeof(node_t));
 	assert(newNode != NULL);
 
 	newNode->id = ++newNodeID;
-	newNode->name = (char*)malloc(sizeof(strlen(nodeName) + 1 /*terminal character*/ ));
+	newNode->name = (char*)calloc(1, sizeof(strlen(nodeName) + 1 /*terminal character*/ ));
 	assert(newNode->name != NULL);
 
 	strncpy(newNode->name, nodeName, strlen(nodeName));
@@ -126,15 +126,17 @@ interface_t* createNodeInterface(node_t* node, char* interfaceName)
 
 	static unsigned int newInterfaceID = 0;
 
-	interface_t* newInterface = (interface_t*)malloc(sizeof(interface_t));
+	interface_t* newInterface = (interface_t*)calloc(1, sizeof(interface_t));
 	assert(newInterface != NULL);
 
 	newInterface->id = ++newInterfaceID;
-	newInterface->name = (char*)malloc(sizeof(strlen(interfaceName) + 1 /*terminal character*/));
+	newInterface->name = (char*)calloc(1, sizeof(strlen(interfaceName) + 1 /*terminal character*/));
 	assert(newInterface->name != NULL);
 
 	strncpy(newInterface->name, interfaceName, strlen(interfaceName));
 	newInterface->name[strlen(newInterface->name)] = '\0';
+
+	newInterface->owningNode = node;
 
 	if(node->interface == NULL)
 	{
@@ -156,34 +158,75 @@ interface_t* createNodeInterface(node_t* node, char* interfaceName)
 
 }
 
-/*void insertLinkBetweenNodes(node_t* fromNode, char* fromInterfaceName, node_t* toNode, char* toInterfaceName, unsigned int linkCost)
+link_t* createLinkBetweenInterfaces(interface_t* interface1, interface_t* interface2, unsigned int linkCost)
+{
+	LOG_FUNCTION_ENTERING();
+	assert(interface1 != NULL && interface2 != NULL && interface1 != interface2);
+
+	static unsigned int newLinkID = 0;
+
+	link_t* newLink = (link_t*)calloc(1, sizeof(link_t));
+	assert(newLink != NULL);
+
+	newLink->id = newLinkID;
+	newLink->interface1 = interface1;
+	newLink->interface2 = interface2;
+	newLink->cost = linkCost;
+
+	interface1->owningLink = newLink;
+	interface2->owningLink = newLink;
+
+	return newLink;
+}
+
+// nodes should exist, the nodes' interfaces and the their link are created
+link_t* insertLinkBetweenNodes(node_t* fromNode, char* fromInterfaceName, node_t* toNode, char* toInterfaceName, unsigned int linkCost)
 {
 	LOG_FUNCTION_ENTERING();
 	assert(fromNode != NULL && fromInterfaceName != NULL && strlen(fromInterfaceName) != 0 && toNode != NULL && toInterfaceName != NULL && strlen(toInterfaceName) != 0);
 
-	static unsigned int newInterfaceID = 0;
+	interface_t* fromInterface = createNodeInterface(fromNode, fromInterfaceName); // TODO: Maybe check if the node has already an interface with that name 
+	assert(fromInterface != NULL);
 
-	interface_t* newInterface = (interface*)malloc(sizeof(interface_t));
-	assert(newInterface != NULL);
+	interface_t* toInterface = createNodeInterface(toNode, toInterfaceName);
+	assert(toInterface != NULL);
 
-	newInterface->id = ++newInterfaceID;
+	link_t* linkBetween = createLinkBetweenInterfaces(fromInterface, toInterface, linkCost);
+	assert(linkBetween != NULL);
 
+	return linkBetween;
+}
 
-}*/
-
-int main(void)
+interface_t* searchNodeForInterfaceByName(node_t* node, char* interfaceName)
 {
-	graph_t* newGraph = createNewGraph("NewGraph");
-	node_t* node1 = createGraphNode(newGraph, "thomas1");
-	createNodeInterface(node1, "if1");
-	createNodeInterface(node1, "if2");
-	createNodeInterface(node1, "if3");
-	node_t* node2 = createGraphNode(newGraph, "thomas2");
-	createNodeInterface(node2, "if4");
-	createNodeInterface(node2, "if5");
-	node_t* node3 = createGraphNode(newGraph, "thomas3");
-	createNodeInterface(node3, "if6");
-	node_t* node4 = createGraphNode(newGraph, "thomas4");
-	printGraph(newGraph);
-	return 0;
+	LOG_FUNCTION_ENTERING();
+	assert(node != NULL && interfaceName != NULL);
+
+	interface_t* currentInterface = node->interface;
+
+	while(currentInterface != NULL)
+	{
+		if(strcmp(currentInterface->name, interfaceName) == 0)
+			return currentInterface;
+		currentInterface = currentInterface->next;
+	}
+
+	return NULL;
+}
+
+node_t* searchGraphForNodeByName(graph_t* graph, char* nodeName)
+{
+	LOG_FUNCTION_ENTERING();
+	assert(graph != NULL && nodeName != NULL);
+
+	node_t* currentNode = graph->node;
+
+	while(currentNode != NULL)
+	{
+		if(strcmp(currentNode->name, nodeName) == 0)
+			return currentNode;
+		currentNode = currentNode->next;
+	}
+
+	return NULL;
 }
