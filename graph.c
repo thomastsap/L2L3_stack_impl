@@ -1,10 +1,10 @@
 #include <stdio.h>
-#undef NDEBUG // when defined, remove assertions from code
-#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include "graph.h"
 #include "util.h"
+
+void setMacAddrOfInterface(interface_t* interface);
 
 node_t* getInterfaceOwningNode(interface_t* interface)
 {
@@ -153,6 +153,8 @@ interface_t* createNodeInterface(node_t* node, char* interfaceName)
 		}
 		previousInterface->next = newInterface;
 	}
+
+	setMacAddrOfInterface(newInterface);
 
 	return newInterface;
 

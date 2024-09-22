@@ -1,7 +1,9 @@
 #include <stdio.h>
-#undef NDEBUG // when defined, remove assertions from code
-#include <assert.h>
 #include "graph.h"
+#define NDEBUG // when defined, remove assertions from code
+#include "util.h"
+#include "net.h"
+#include <string.h>
 
 int main(void)
 {
@@ -35,13 +37,33 @@ int main(void)
 	node_t* notFoundNode = searchGraphForNodeByName(newGraph, "thomas5");
 	assert(notFoundNode == NULL);
 
-	macAddressStr_t mac;
+	macAddr_t mac;
+	memset(&mac, 0, sizeof(mac));
+	mac.byte[0] = 1;
 
 	ipv4_t ipv4;
 
-	ipv4.uint8ArrRep.byte[0] = 16;
+	ipv4.uint8ArrRep.byte[0] = 192;
+	ipv4.uint8ArrRep.byte[1] = 168;
+	ipv4.uint8ArrRep.byte[2] = 1;
+	ipv4.uint8ArrRep.byte[3] = 24;
 
-	printf("%d\n", ipv4.uint8ArrRep.byte[0]);
+	printf("%d\n", ipv4.uint32Rep);
+
+	setMacAddrOfInterface(foundInterface1);
+
+	ipV4Str_t ipv4Str;
+	convertIpv4ToString(ipv4, &ipv4Str);
+	printf("%s\n", ipv4Str.ch);
+
+	ipv4_t ipv4_;
+	convertStringToIpv4(ipv4Str.ch, &ipv4_);
+	printf("%d.%d.%d.%d \n", ipv4_.uint8ArrRep.byte[0], ipv4_.uint8ArrRep.byte[1], ipv4_.uint8ArrRep.byte[2], ipv4_.uint8ArrRep.byte[3]);
+
+	macAddressStr_t macAddrStr;
+
+
+	convertMacAddrToString(mac, &macAddrStr);
 
 	return 0;
 }
